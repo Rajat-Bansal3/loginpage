@@ -1,18 +1,26 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import {z} from "zod"
 
 const RegistrationPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: "",
+    userName: "",
     dob: "",
     gender: "",
     phone: "",
     email: "",
     state: "",
     password: "",
-    confirmPassword: "",
   });
+  const passwordSchema = z
+  .string()
+  .min(8, 'Password must be at least 8 characters long')
+  .regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+    'Password must contain at least one lowercase letter, one uppercase letter, one digit, and one special character'
+  );
 
   const [passwordError, setPasswordError] = useState("");
   const [apiError, setApiError] = useState("");
@@ -26,25 +34,20 @@ const RegistrationPage = () => {
     }
 
     try {
-      //   const response = await fetch("https://your-backend-api.com/register", {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify(formData),
-      //   });
-
-      //   if (!response.ok) {
-      //     setApiError("Registration failed. Please check your information.");
-      //     return;
-      //   }
+      passwordSchema.parse(formData.password)
+      const data = axios
+        .post("http://localhost:3000/signup", formData)
+        .then(navigate("/login"))
+        .catch((err) => console.log(err));
 
       console.log("Registration successful:", formData);
-
-      navigate("/dashboard");
     } catch (error) {
-      console.error("Error during registration:", error);
-      setApiError("An unexpected error occurred. Please try again later.");
+      if (error.errors) {
+        setPasswordError(error.errors[0]?.message);
+      } else {
+        console.error("Error during registration:", error);
+        setApiError("An unexpected error occurred. Please try again later.");
+      }
     }
   };
 
@@ -67,8 +70,8 @@ const RegistrationPage = () => {
             </label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="userName"
+              value={formData.userName}
               placeholder="Enter Name"
               className="p-3 w-full bg-gray-200 rounded-md focus:outline-none focus:ring focus:border-blue-300"
               onChange={handleInput}
@@ -156,7 +159,43 @@ const RegistrationPage = () => {
                 <option value="">Select State</option>
                 <option value="Andhra Pradesh">Andhra Pradesh</option>
                 <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                {/* Add other state options as needed */}
+                <option value="Assam">Assam</option>
+                <option value="Bihar">Bihar</option>
+                <option value="Chhattisgarh">Chhattisgarh</option>
+                <option value="Goa">Goa</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Haryana">Haryana</option>
+                <option value="Himachal Pradesh">Himachal Pradesh</option>
+                <option value="Jharkhand">Jharkhand</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Kerala">Kerala</option>
+                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Manipur">Manipur</option>
+                <option value="Meghalaya">Meghalaya</option>
+                <option value="Mizoram">Mizoram</option>
+                <option value="Nagaland">Nagaland</option>
+                <option value="Odisha">Odisha</option>
+                <option value="Punjab">Punjab</option>
+                <option value="Rajasthan">Rajasthan</option>
+                <option value="Sikkim">Sikkim</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Tripura">Tripura</option>
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Uttarakhand">Uttarakhand</option>
+                <option value="West Bengal">West Bengal</option>
+
+                <option value="Andaman and Nicobar Islands">
+                  Andaman and Nicobar Islands
+                </option>
+                <option value="Chandigarh">Chandigarh</option>
+                <option value="Dadra and Nagar Haveli and Daman and Diu">
+                  Dadra and Nagar Haveli and Daman and Diu
+                </option>
+                <option value="Lakshadweep">Lakshadweep</option>
+                <option value="Delhi">Delhi</option>
+                <option value="Puducherry">Puducherry</option>
               </select>
             </div>
           </div>

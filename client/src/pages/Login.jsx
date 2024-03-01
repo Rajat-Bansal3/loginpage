@@ -1,19 +1,56 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const LoginPage = () => {
-  const [value, setValue] = useState({
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
-  const handleOnSubmit = (e) => {
+
+  const [passwordError, setPasswordError] = useState("");
+  const [apiError, setApiError] = useState("");
+
+  const handleOnSubmit = async (e) => {
     e.preventDefault();
-    //api req logic here
+
+    try {
+      const response = await axios
+        .post("http://localhost:3000/login", formData)
+        .then((res) => {
+          if (res.data.message === "success") {
+            navigate("/dashboard");
+          } else if (res.data.message === "no users found") {
+            alert("invalid credentials");
+          } else {
+            alert("error logging in");
+          }
+        })
+        .catch((err) => console.log(err));
+
+      console.log("Login successful");
+
+    } catch (error) {
+      console.error("Error during login:", error.response.data);
+
+      if (error.response.status === 401) {
+        setPasswordError("Invalid username or password. Please try again.");
+      } else {
+        setApiError("An unexpected error occurred. Please try again later.");
+      }
+    }
   };
+
   const handleInput = (e) => {
-    setValue((prev) => ({ ...prev, [e.target.name]: [e.target.value] }));
+    const { name, value } = e.target;
+    setFormData((prevData) => ({ ...prevData, [name]: value }));
+
+    if (name === "password") {
+      setPasswordError("");
+    }
   };
-  console.log(value);
+
   return (
     <div className="h-screen flex justify-center items-center bg-gray-100">
       <div className="bg-white p-8 rounded-md shadow-md w-1/3">
@@ -39,9 +76,15 @@ const LoginPage = () => {
               onChange={handleInput}
               type="password"
               placeholder="Enter Password"
-              className="p-3 w-full bg-gray-200 rounded-md focus:outline-none focus:ring focus:border-blue-300"
+              className={`p-3 w-full bg-gray-200 rounded-md focus:outline-none focus:ring focus:border-blue-300 ${
+                passwordError ? "border-red-500" : ""
+              }`}
             />
+            {passwordError && (
+              <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+            )}
           </div>
+          {apiError && <p className="text-red-500 text-sm mb-4">{apiError}</p>}
           <button className="bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
             Login
           </button>
